@@ -1,7 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-import tkinter.ttk as ttk 
-from ttkthemes import ThemedStyle
+import tkinter.ttk as ttk
 
 D_FONT = ('Monospace', 20)
 M_FONT = ('Monospace', 30)

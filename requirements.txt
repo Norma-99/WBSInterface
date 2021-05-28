@@ -1,0 +1,8 @@
+pandas
+tensorflow
+partition
+whois
+pycountry_convert
+ip2geotools
+tld
+beautifulsoup4

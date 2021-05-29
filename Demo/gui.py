@@ -1,8 +1,27 @@
+import logging
 import tkinter as tk
 import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 
-################ Widgets ################
+
+logger = logging.getLogger(__name__)
+
+
+class MainFrame(ttk.Frame):
+    'Frame used as container for the swapping frames'
+    def __init__(self, master, controller, frame_classes):
+        super().__init__(master=master)
+        self.frames = {}
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        for frame_class in frame_classes:
+            self.frames[frame_class.__name__] = frame_class(master=self, controller=controller)
+            self.frames[frame_class.__name__].grid(row=0, column=0, sticky="nsew")
+
+    def raise_frame(self, frame_name):
+        'Swaps to the frame passed by parameter'
+        self.frames[frame_name].tkraise()
+        logger.info(f'Raised frame {frame_name}')
 
 class Title(ttk.Label):
     def __init__(self, master, **kw):
@@ -49,56 +68,65 @@ class PlaceholderEntry(ttk.Entry):
 
 ################ Frames ################
 
-
-class BaseFrame(ttk.Frame):
+class InitialFrame(ttk.Frame):
+    'Home frame shown when the ui is loaded'
     def __init__(self, master, controller, **kw):
-        ttk.Frame.__init__(self, master, **kw)
-        self.grid(row=0, column=0, sticky=tk.NSEW)
-        self.container = ttk.Frame(self)
-        self.container.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        super().__init__(master, **kw)
         self.controller = controller
 
+        # Create widgets
+        self.title = ttk.Label(self, text='Welcome to Web Blocking System', style='Title.TLabel')
+        self.box =  Field(self, name='Enter a suspicious URL', default_val='URL HERE')  # TODO: Refactor
+        self.button = Button(self, text='Enter', command=self.on_click)
 
-class InitialFrame(BaseFrame):
-    def __init__(self, master, controller, **kw):
-        BaseFrame.__init__(self, master, controller, **kw)
-        self.title = Title(self.container, text='Welcome to Web Blocking System')
-        self.box =  Field(self.container, name='Enter a suspicious URL', default_val='URL HERE')
-
+        # Place widgets
         self.title.pack(side='top', pady=10)
         self.box.pack(side='top', pady=40)
-        Button(self.container, text='Enter', command=self.on_click).pack(side='top')
+        self.button.pack(side='top')
+
+        # Bind events
         self.box.entry.bind('<Key-Return>', lambda e: self.on_click())
 
     def on_click(self):
+        logger.info('Running InitialFrame on_click')
         self.controller.pass_url(self.box.var.get())
 
 
-class AnalyzingFrame(BaseFrame):
+class AnalyzingFrame(ttk.Frame):
     def __init__(self, master, controller, **kw):
-        BaseFrame.__init__(self, master, controller, **kw)
-        self.img = Image.open("Demo/einstein.png")
-        self.tkimg = ImageTk.PhotoImage(self.img)
-        self.label = Title(self.container, text='Analyzing URL...')
+        super().__init__(master, **kw)
+
+        # Create widgets
+        self.label = Title(self, text='Analyzing URL...')
+        self.canvas = self.create_image_canvas(self, "Demo/einstein.png")
+        
+        # Place widgets
         self.label.pack(side='top', pady=10)
-        #tk.Label(self, image=self.tkimg).grid(row=1, column=1)
-        self.canvas = tk.Canvas(self.container, width = self.img.size[0] + 20, height = self.img.size[1] + 20)
         self.canvas.pack(side='top', pady=10)
-        self.canvas.create_image(10, 10, anchor='nw', image=self.tkimg)  
+         
+    @staticmethod
+    def create_image_canvas(master, filepath):
+        img = Image.open(filepath)
+        tkimg = ImageTk.PhotoImage(img)
+        canvas = tk.Canvas(master, width = img.size[0] + 20, height = img.size[1] + 20)
+        canvas.create_image(10, 10, anchor='nw', image=tkimg)
+        return canvas
 
 
-class ResultFrame(BaseFrame):
+
+class ResultFrame(ttk.Frame):
     def __init__(self, master, controller, **kw):
-        BaseFrame.__init__(self, master, controller, **kw)
-        self.res = Title(self.container, text='Looks like your URL is')
+        super().__init__(master, **kw)
+        self.controller = controller
+        self.res = Title(self, text='Looks like your URL is')
         self.res.pack(side='top', pady=10)
         self.prediction = tk.StringVar()
         self.warning = tk.StringVar()
-        self.out = Title(self.container, text='', textvariable=self.prediction)
+        self.out = Title(self, text='', textvariable=self.prediction)
         self.out.pack(side='top', pady=10)
-        self.text = Text(self.container, text='', textvariable=self.warning)
+        self.text = Text(self, text='', textvariable=self.warning)
         self.text.pack(side="top", fill="both", expand=True, padx=0, pady=10)
-        self.button = Button(self.container, text='Return', command=self.on_click)
+        self.button = Button(self, text='Return', command=self.on_click)
         self.button.pack(side='bottom')
 
     def return_prediction(self, prediction, color, warning): 

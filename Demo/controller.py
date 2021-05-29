@@ -1,13 +1,16 @@
 import tkinter as tk
+import tkinter.ttk as ttk
 import threading
 import logging
+from ttkbootstrap import Style
 
 from Demo import coms
-from Demo.gui import InitialFrame, AnalyzingFrame, ResultFrame
+from Demo.gui import InitialFrame, AnalyzingFrame, ResultFrame, Title
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_FONT = ('Monospace', 20)
+DEFAULT_FONT = ('Helvetica', 20)
+TITLE_FONT = ('Helvetica', 30)
 
 WARNING_GOOD = "Having a GOOD URL output means that no malicious content \nhas been detected in the web page. \nYou can now start navigating safely through the page."
 WARNING_SUSPICIOUS = "Having a SUSPICIOUS URL output means that the \nsystem suspects that the web page \ncan contain malicious content but it is not sure. \nNavigating through that website can be dangerous."
@@ -20,7 +23,11 @@ class App:
         self.root.title('Web Blocking System')
         self.root.geometry('800x600')
 
-        self.main_container = tk.Frame(self.root)
+        self.style = Style()
+        self.style.configure('.', background='#000000')
+        self.style.configure('Title.TLabel', font=('Helvetica', 100))
+
+        self.main_container = ttk.Frame(self.root)
         self.main_container.pack(fill='both', expand=True)
         self.main_container.grid_rowconfigure(0, weight=1)
         self.main_container.grid_columnconfigure(0, weight=1)

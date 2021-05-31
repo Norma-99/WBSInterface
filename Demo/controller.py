@@ -5,7 +5,7 @@ import logging
 
 from Demo import coms
 from Demo.styles import Colors, Fonts
-from Demo.gui import InitialFrame, AnalyzingFrame, MainFrame, ResultFrame
+from Demo.gui import InitialFrame, MainFrame, ResultFrame
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +28,10 @@ class App:
         
         # Model
         self.url = tk.StringVar()
+        self.status = tk.StringVar()
         self.analyzer = coms.Analyzer()
-        self.prediction = -1
-        self.output = ''
-        self.color = 'black'
-        self.warning = ''
+        self.output = tk.StringVar()
+        self.output_details = tk.StringVar()
 
         # UI styles definition
         self.style = ttk.Style()
@@ -47,47 +46,44 @@ class App:
         self.main_container = MainFrame(
             master=self.root,
             controller=self,
-            frame_classes=[InitialFrame, AnalyzingFrame, ResultFrame])
+            frame_classes=[InitialFrame, ResultFrame])
         self.main_container.pack(fill='both', expand=True)
         self.main_container.raise_frame('InitialFrame')
 
     def pass_url(self):
         logger.info(f'Processing url {self.url.get()}')
-        self.main_container.raise_frame('AnalyzingFrame')
-        threading.Thread(target=lambda: self.analyze(), daemon=True).start()
+        self.status.set('Analyzing...')
+        threading.Thread(target=self.analyze, daemon=True).start()
 
     def analyze(self):
         logger.info(f'Analyzing')
         try:
-            self.prediction = self.analyzer.predict(self.url.get())
-            if self.prediction != -1:
-                if self.prediction <= 0.2:
-                    self.output = 'Good'
-                    self.color = 'green'
-                    self.warning = WARNING_GOOD
+            prediction = self.analyzer.predict(self.url.get())
+            if prediction != -1:
+                if prediction <= 0.2:
+                    self.output.set('Good')
+                    self.output_details.set(WARNING_GOOD)
 
-                elif self.prediction >= 0.8:
-                    self.output = 'Bad'
-                    self.color = 'red'
-                    self.warning = WARNING_BAD
+                elif prediction >= 0.8:
+                    self.output.set('Bad')
+                    self.output_details.set(WARNING_BAD)
 
                 else:
-                    self.output = 'Suspicious'
-                    self.color = 'orange'
-                    self.warning = WARNING_SUSPICIOUS
-        except:
-            self.output = 'Unreachable'
-            self.color = 'purple'
-            self.warning = WARNING_UNREACHABLE
+                    self.output.set('Suspicious')
+                    self.output_details.set(WARNING_SUSPICIOUS)
+        except Exception as e:
+            logger.warn(f'An exception occured {e}')
+            self.output.set('Unreachable')
+            self.output_details.set(WARNING_UNREACHABLE)
 
-        self.main_container.frames['ResultFrame'].return_prediction(
-            self.output, self.color, self.warning)
+        self.main_container.frames['ResultFrame'].return_prediction()
         self.root.after_idle(
             lambda: self.main_container.raise_frame('ResultFrame'))
 
     def return_initial(self):
+        self.status.set('')
         self.main_container.raise_frame('InitialFrame')
-        self.main_container.frames['InitialFrame'].box.entry.focus_set()
+        self.main_container.frames['InitialFrame'].entry.focus_set()
 
 
 def run():

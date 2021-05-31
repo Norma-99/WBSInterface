@@ -1,7 +1,7 @@
 pandas
 tensorflow
 partition
-whois
+python-whois
 pycountry_convert
 ip2geotools
 tld

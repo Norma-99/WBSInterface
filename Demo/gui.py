@@ -33,11 +33,6 @@ class Title(ttk.Label):
         ttk.Label.__init__(self, master, style='Title.TLabel', **kw)
 
 
-class Text(ttk.Label):
-    def __init__(self, master, **kw):
-        ttk.Label.__init__(self, master, **kw)
-
-
 class Button(ttk.Button):
     def __init__(self, master, text='Button', command=lambda: print('Pressed'), **kw):
         ttk.Button.__init__(self, master, text=text, command=command, **kw)
@@ -117,16 +112,16 @@ class ResultFrame(ttk.Frame):
         # Create widgets
         self.title = ttk.Label(
             self, text='Web Blocking System', style='Title.TLabel')
-        self.res = Title(self, text='Looks like your URL is')
-        self.out = Title(self, text='', textvariable=self.controller.output)
-        self.text = Text(self, text='', textvariable=self.controller.output_details)
+        self.res = ttk.Label(self, text='Looks like your URL is')
+        self.out = ttk.Label(self, textvariable=self.controller.output, style='Title.TLabel')
+        self.text = ttk.Label(self, textvariable=self.controller.output_details, justify=tk.CENTER)
         self.button = Button(self, text='Return', command=self.on_click)
 
         # Place widgets
-        self.title.pack(side='top', pady=10)
-        self.res.pack(side='top', pady=30)
+        self.title.pack(side='top', pady=80)
+        self.res.pack(side='top', pady=10)
         self.out.pack(side='top', pady=10)
-        self.text.pack(side="top", fill="both", expand=True, padx=30, pady=10)
+        self.text.pack(side='top', pady=30)
         self.button.pack(side='bottom', pady=30)
 
     def return_prediction(self):

@@ -4,14 +4,15 @@ import threading
 import logging
 
 from Demo import coms
+from Demo.styles import Colors, Fonts
 from Demo.gui import InitialFrame, AnalyzingFrame, MainFrame, ResultFrame
 
 logger = logging.getLogger(__name__)
 
-WARNING_GOOD = "Having a GOOD URL output means that no malicious content \nhas been detected in the web page. \nYou can now start navigating safely through the page."
-WARNING_SUSPICIOUS = "Having a SUSPICIOUS URL output means that the \nsystem suspects that the web page \ncan contain malicious content but it is not sure. \nNavigating through that website can be dangerous."
-WARNING_BAD = "Having a BAD URL output means that the web page \nis corrupted with malicious content and \nthat the user should not access the site."
-WARNING_UNREACHABLE = "Having an UNREACHABLE URL output means \nthat the URL entry was or not available or wrongly written. \nPlease re-entry the URL with a format such as: \nhttps://www.example.com/args and re-analize the web page. "
+WARNING_GOOD = "Having a GOOD URL output means that no \nmalicious content has been detected \nin the web page. You can now start \nnavigating safely through the page."
+WARNING_SUSPICIOUS = "Having a SUSPICIOUS URL output \nmeans that the system suspects that \nthe web page can contain malicious content \nbut it is not sure. Navigating through \nthat website can be dangerous."
+WARNING_BAD = "Having a BAD URL output means that the \nweb page is corrupted with malicious \ncontent and that the user should not \naccess the site."
+WARNING_UNREACHABLE = "Having an UNREACHABLE URL output \nmeans that the URL entry was or not available \nor wrongly written. Please re-entry the URL \nwith a format such as: https://www.example.com/args \nand re-analize the web page. "
 
 
 class App:
@@ -19,23 +20,28 @@ class App:
 
     def __init__(self):
         'Builds model and ui'
+        # Root widget for the ui
+        self.root = tk.Tk()
+        self.root.title('Web Blocking System')
+        self.root.geometry('900x700')
+        self.root.resizable(0, 0)
+        
         # Model
-        self.url = ''
+        self.url = tk.StringVar()
         self.analyzer = coms.Analyzer()
         self.prediction = -1
         self.output = ''
         self.color = 'black'
         self.warning = ''
 
-        # Root widget for the ui
-        self.root = tk.Tk()
-        self.root.title('Web Blocking System')
-        self.root.geometry('800x600')
-
         # UI styles definition
         self.style = ttk.Style()
-        self.style.configure('.', font=('Helvetica', 20))
-        self.style.configure('Title.TLabel', font=('Helvetica', 30))
+        self.style.theme_use('clam')
+        self.style.configure('.', font=Fonts.BODY, background=Colors.DEFAULT_BACKGROUND, foreground=Colors.DEFAULT_FOREGROUND)
+        self.style.configure('Title.TLabel', font=Fonts.TITLE)
+        self.style.configure('TEntry', fieldbackground=Colors.DEFAULT_FOREGROUND, foreground=Colors.DEFAULT_BACKGROUND, bordercolor=Colors.DARK_BACKGROUND, lightcolor=Colors.DARK_BACKGROUND, darkcolor=Colors.DARK_BACKGROUND)
+        self.style.configure('TButton', bordercolor=Colors.DEFAULT_FOREGROUND, lightcolor=Colors.DEFAULT_FOREGROUND, darkcolor=Colors.DEFAULT_FOREGROUND)
+        self.style.map('TButton', foreground=[('active', Colors.DEFAULT_BACKGROUND), ('pressed', Colors.DEFAULT_BACKGROUND)], background=[('active', Colors.DEFAULT_FOREGROUND), ('pressed', Colors.DEFAULT_FOREGROUND)])
 
         # Main container used for swapping between panels
         self.main_container = MainFrame(
@@ -45,16 +51,15 @@ class App:
         self.main_container.pack(fill='both', expand=True)
         self.main_container.raise_frame('InitialFrame')
 
-    def pass_url(self, url: str):
-        logger.info(f'Processing url {url}')
-        self.url = url
+    def pass_url(self):
+        logger.info(f'Processing url {self.url.get()}')
         self.main_container.raise_frame('AnalyzingFrame')
         threading.Thread(target=lambda: self.analyze(), daemon=True).start()
 
     def analyze(self):
         logger.info(f'Analyzing')
         try:
-            self.prediction = self.analyzer.predict(self.url)
+            self.prediction = self.analyzer.predict(self.url.get())
             if self.prediction != -1:
                 if self.prediction <= 0.2:
                     self.output = 'Good'

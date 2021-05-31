@@ -1,3 +1,4 @@
+from Demo.styles import Fonts
 import logging
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -48,7 +49,7 @@ class Field(ttk.Frame):
 
 class PlaceholderEntry(ttk.Entry):
     def __init__(self, container, placeholder, **kwargs):
-        ttk.Entry.__init__(self, container, **kwargs)
+        ttk.Entry.__init__(self, container, style='Placeholder.TEntry', font=Fonts.ENTRY, **kwargs)
         self.placeholder = placeholder
 
         self.insert("0", self.placeholder)
@@ -76,20 +77,22 @@ class InitialFrame(ttk.Frame):
 
         # Create widgets
         self.title = ttk.Label(self, text='Welcome to Web Blocking System', style='Title.TLabel')
-        self.box =  Field(self, name='Enter a suspicious URL', default_val='URL HERE')  # TODO: Refactor
+        self.entry_caption = ttk.Label(self, text='Enter a suspicious URL')
+        self.entry = PlaceholderEntry(self, 'URL HERE', width=32, textvariable=self.controller.url)
         self.button = Button(self, text='Enter', command=self.on_click)
 
         # Place widgets
-        self.title.pack(side='top', pady=10)
-        self.box.pack(side='top', pady=40)
-        self.button.pack(side='top')
+        self.title.pack(side='top', pady=80)
+        self.entry_caption.pack(side='top', pady=10)
+        self.entry.pack(side='top')
+        self.button.pack(side='top', pady=40)
 
         # Bind events
-        self.box.entry.bind('<Key-Return>', lambda e: self.on_click())
+        self.entry.bind('<Key-Return>', lambda e: self.on_click())
 
     def on_click(self):
         logger.info('Running InitialFrame on_click')
-        self.controller.pass_url(self.box.var.get())
+        self.controller.pass_url()
 
 
 class AnalyzingFrame(ttk.Frame):
@@ -118,16 +121,23 @@ class ResultFrame(ttk.Frame):
     def __init__(self, master, controller, **kw):
         super().__init__(master, **kw)
         self.controller = controller
+
+        # Create widgets
+        self.title = ttk.Label(self, text='Web Blocking System', style='Title.TLabel')
         self.res = Title(self, text='Looks like your URL is')
-        self.res.pack(side='top', pady=10)
         self.prediction = tk.StringVar()
         self.warning = tk.StringVar()
         self.out = Title(self, text='', textvariable=self.prediction)
-        self.out.pack(side='top', pady=10)
         self.text = Text(self, text='', textvariable=self.warning)
-        self.text.pack(side="top", fill="both", expand=True, padx=0, pady=10)
         self.button = Button(self, text='Return', command=self.on_click)
-        self.button.pack(side='bottom')
+        
+
+        # Place widgets
+        self.title.pack(side='top', pady=10)
+        self.res.pack(side='top', pady=30)
+        self.out.pack(side='top', pady=10)
+        self.text.pack(side="top", fill="both", expand=True, padx=30, pady=10)
+        self.button.pack(side='bottom', pady=30)
 
     def return_prediction(self, prediction, color, warning): 
         self.prediction.set(prediction)

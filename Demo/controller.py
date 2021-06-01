@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import font
 import tkinter.ttk as ttk
 import threading
 import logging
@@ -38,6 +39,10 @@ class App:
         self.style.theme_use('clam')
         self.style.configure('.', font=Fonts.BODY, background=Colors.DEFAULT_BACKGROUND, foreground=Colors.DEFAULT_FOREGROUND)
         self.style.configure('Title.TLabel', font=Fonts.TITLE)
+        self.style.configure('Result.TLabel', font=Fonts.TITLE)
+        self.style.configure('success.Result.TLabel', foreground=Colors.SUCCESS)
+        self.style.configure('warning.Result.TLabel', foreground=Colors.WARNING)
+        self.style.configure('danger.Result.TLabel', foreground=Colors.DANGER)
         self.style.configure('TEntry', fieldbackground=Colors.DEFAULT_FOREGROUND, foreground=Colors.DEFAULT_BACKGROUND, bordercolor=Colors.DARK_BACKGROUND, lightcolor=Colors.DARK_BACKGROUND, darkcolor=Colors.DARK_BACKGROUND)
         self.style.configure('TButton', bordercolor=Colors.DEFAULT_FOREGROUND, lightcolor=Colors.DEFAULT_FOREGROUND, darkcolor=Colors.DEFAULT_FOREGROUND)
         self.style.map('TButton', foreground=[('active', Colors.DEFAULT_BACKGROUND), ('pressed', Colors.DEFAULT_BACKGROUND)], background=[('active', Colors.DEFAULT_FOREGROUND), ('pressed', Colors.DEFAULT_FOREGROUND)])
@@ -63,18 +68,22 @@ class App:
                 if prediction <= 0.2:
                     self.output.set('Good')
                     self.output_details.set(WARNING_GOOD)
+                    self.main_container.frames['ResultFrame'].out.configure(style='success.Result.TLabel')
 
                 elif prediction >= 0.8:
                     self.output.set('Bad')
                     self.output_details.set(WARNING_BAD)
+                    self.main_container.frames['ResultFrame'].out.configure(style='danger.Result.TLabel')
 
                 else:
                     self.output.set('Suspicious')
                     self.output_details.set(WARNING_SUSPICIOUS)
+                    self.main_container.frames['ResultFrame'].out.configure(style='warning.Result.TLabel')
         except Exception as e:
             logger.warn(f'An exception occured {e}')
             self.output.set('Unreachable')
             self.output_details.set(WARNING_UNREACHABLE)
+            self.main_container.frames['ResultFrame'].out.configure(style='warning.Result.TLabel')
 
         self.main_container.frames['ResultFrame'].return_prediction()
         self.root.after_idle(

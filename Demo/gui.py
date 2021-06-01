@@ -28,25 +28,10 @@ class MainFrame(ttk.Frame):
         logger.info(f'Raised frame {frame_name}')
 
 
-class Title(ttk.Label):
-    def __init__(self, master, **kw):
-        ttk.Label.__init__(self, master, style='Title.TLabel', **kw)
-
-
 class Button(ttk.Button):
     def __init__(self, master, text='Button', command=lambda: print('Pressed'), **kw):
         ttk.Button.__init__(self, master, text=text, command=command, **kw)
         self.bind('<Return>', lambda e: command())
-
-
-class Field(ttk.Frame):
-    def __init__(self, master, name='Field', default_val='', **kw):
-        ttk.Frame.__init__(self, master, **kw)
-        self.var = tk.StringVar()
-        ttk.Label(self, text=name).grid(row=0, column=0)
-        self.entry = PlaceholderEntry(
-            self, placeholder=default_val, textvariable=self.var)
-        self.entry.grid(row=1, column=0)
 
 
 class PlaceholderEntry(ttk.Entry):
@@ -69,8 +54,6 @@ class PlaceholderEntry(ttk.Entry):
         if not self.get():
             self.insert("0", self.placeholder)
 
-
-################ Frames ################
 
 class InitialFrame(ttk.Frame):
     'Home frame shown when the ui is loaded'
@@ -112,16 +95,16 @@ class ResultFrame(ttk.Frame):
         # Create widgets
         self.title = ttk.Label(
             self, text='Web Blocking System', style='Title.TLabel')
-        self.res = ttk.Label(self, text='Looks like your URL is')
-        self.out = ttk.Label(self, textvariable=self.controller.output, style='Title.TLabel')
+        self.url = ttk.Label(self, textvariable=self.controller.url)
+        self.out = ttk.Label(self, textvariable=self.controller.output, style='Result.TLabel')
         self.text = ttk.Label(self, textvariable=self.controller.output_details, justify=tk.CENTER)
         self.button = Button(self, text='Return', command=self.on_click)
 
         # Place widgets
         self.title.pack(side='top', pady=80)
-        self.res.pack(side='top', pady=10)
+        self.url.pack(side='top', pady=10)
         self.out.pack(side='top', pady=10)
-        self.text.pack(side='top', pady=30)
+        self.text.pack(side='top', pady=20)
         self.button.pack(side='bottom', pady=30)
 
     def return_prediction(self):

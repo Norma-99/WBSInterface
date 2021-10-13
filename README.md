@@ -4,13 +4,18 @@ The main interface for the Webpages Blocking System repository
 
 ## Structure
 
-Main view
+### Main view
+
 ![Screenshot](1st_view.png)
 
-Data analysis entering view
+
+### Data analysis entering view
+
 ![Screenshot](2nd_view.png)
 
-Output view
+
+### Output view
+
 ![Screenshot](out_view.png)
 
 
